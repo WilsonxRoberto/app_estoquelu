@@ -98,6 +98,12 @@ const ProductCard = ({ product, adjustStock }: { product: Product, adjustStock: 
 export default function App() {
   const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+
+  const categories = useMemo(() => {
+    const cats = new Set(products.map(p => p.category));
+    return Array.from(cats).sort();
+  }, [products]);
   const [isLoading, setIsLoading] = useState(true);
   const [isImporting, setIsImporting] = useState(false);
   const [isSavingLogs, setIsSavingLogs] = useState(false);
@@ -213,12 +219,14 @@ export default function App() {
   };
 
   const filteredProducts = useMemo(() => {
-    return products.filter(p => 
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      p.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.category.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [products, searchTerm]);
+    return products.filter(p => {
+      const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                            p.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            p.category.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = selectedCategory === '' ? true : p.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [products, searchTerm, selectedCategory]);
 
   // Group by category
   const groupedProducts = useMemo(() => {
@@ -287,16 +295,26 @@ export default function App() {
 
         {/* Main Content */}
         <main className="glass-panel overflow-hidden">
-          <div className="panel-header bg-slate-100/50">
-            <h2 className="panel-title">
+          <div className="panel-header bg-slate-100/50 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            <h2 className="panel-title mb-0">
               <Search className="w-5 h-5 text-blue-500" />
               Inventário
             </h2>
-            <div className="w-full max-w-sm ml-auto">
+            <div className="w-full sm:w-auto flex-1 flex flex-col sm:flex-row gap-3 ml-auto justify-end">
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="search-input sm:max-w-[250px] bg-white cursor-pointer"
+              >
+                <option value="">Todas as Categorias</option>
+                {categories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
               <input
                 type="text"
-                placeholder="Buscar por nome, SKU ou categoria..."
-                className="search-input"
+                placeholder="Buscar por nome ou SKU..."
+                className="search-input sm:max-w-xs"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
