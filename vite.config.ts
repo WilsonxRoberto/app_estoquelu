@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/app_estoque/',
+  base: '/app_estoquelu/',
   plugins: [
     react(),
     tailwindcss(),
