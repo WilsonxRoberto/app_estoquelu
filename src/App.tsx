@@ -5,6 +5,87 @@ import { fetchSheetData, sendLogsToSheet, type Product, type StockLog } from './
 
 const DEFAULT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1WkmVkfNAu83_Sc7AfFnofP-1oSpdJxdjOmlyTcLcvTc/export?format=csv&gid=247051946';
 
+const ProductCard = ({ product, adjustStock }: { product: Product, adjustStock: (p: Product, delta: number) => void }) => {
+  const [amount, setAmount] = useState<number | ''>(1);
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (val === '') {
+      setAmount('');
+      return;
+    }
+    const num = parseInt(val);
+    if (!isNaN(num) && num > 0) {
+      setAmount(num);
+    }
+  };
+
+  const handleAdjust = (multiplier: number) => {
+    const delta = (typeof amount === 'number' ? amount : 1) * multiplier;
+    adjustStock(product, delta);
+  };
+
+  return (
+    <motion.div 
+      layout
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex flex-col justify-between h-full"
+    >
+      <div className={`absolute top-0 left-0 w-1 h-full ${
+        product.stock === 0 ? 'bg-red-500' : 
+        product.stock <= product.minStock ? 'bg-amber-400' : 'bg-emerald-500'
+      }`} />
+      
+      <div className="pl-2 flex-1">
+        <div className="flex justify-between items-start mb-2">
+          <span className="text-xs font-mono bg-slate-100 text-slate-600 px-2 py-1 rounded-md">
+            {product.sku}
+          </span>
+          <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+            product.stock === 0 ? 'bg-red-100 text-red-700' : 
+            product.stock <= product.minStock ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'
+          }`}>
+            {product.stock === 0 ? 'Zerado' : product.stock <= product.minStock ? 'Baixo' : 'OK'}
+          </span>
+        </div>
+        
+        <h4 className="font-semibold text-slate-800 line-clamp-2 min-h-[3rem]">{product.name}</h4>
+      </div>
+        
+      <div className="mt-4 pl-2 flex items-center justify-between">
+        <div className="flex flex-col">
+          <span className="text-2xl font-bold text-blue-600">{product.stock} <span className="text-sm font-normal text-slate-500">{product.unit}</span></span>
+          <span className="text-xs text-slate-400">Máx: {product.maxStock || '-'}</span>
+        </div>
+        
+        <div className="flex items-center bg-slate-50 p-1 rounded-lg border border-slate-200">
+          <button 
+            onClick={() => handleAdjust(-1)}
+            disabled={product.stock <= 0}
+            className="p-2 text-slate-600 hover:bg-white hover:text-red-600 rounded-md transition-colors disabled:opacity-50"
+          >
+            <Minus className="w-4 h-4" />
+          </button>
+          <input 
+            type="number"
+            min="1"
+            value={amount}
+            onChange={handleAmountChange}
+            className="w-10 text-center text-sm font-semibold text-slate-700 bg-transparent border-none focus:outline-none focus:ring-0 p-0"
+          />
+          <button 
+            onClick={() => handleAdjust(1)}
+            className="p-2 text-slate-600 hover:bg-white hover:text-emerald-600 rounded-md transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
 export default function App() {
   const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -232,57 +313,7 @@ export default function App() {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {items.map(product => (
-                        <motion.div 
-                          layout
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          key={product.id} 
-                          className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden"
-                        >
-                          <div className={`absolute top-0 left-0 w-1 h-full ${
-                            product.stock === 0 ? 'bg-red-500' : 
-                            product.stock <= product.minStock ? 'bg-amber-400' : 'bg-emerald-500'
-                          }`} />
-                          
-                          <div className="pl-2">
-                            <div className="flex justify-between items-start mb-2">
-                              <span className="text-xs font-mono bg-slate-100 text-slate-600 px-2 py-1 rounded-md">
-                                {product.sku}
-                              </span>
-                              <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                                product.stock === 0 ? 'bg-red-100 text-red-700' : 
-                                product.stock <= product.minStock ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'
-                              }`}>
-                                {product.stock === 0 ? 'Zerado' : product.stock <= product.minStock ? 'Baixo' : 'OK'}
-                              </span>
-                            </div>
-                            
-                            <h4 className="font-semibold text-slate-800 line-clamp-2 min-h-[3rem]">{product.name}</h4>
-                            
-                            <div className="mt-4 flex items-center justify-between">
-                              <div className="flex flex-col">
-                                <span className="text-2xl font-bold text-blue-600">{product.stock} <span className="text-sm font-normal text-slate-500">{product.unit}</span></span>
-                                <span className="text-xs text-slate-400">Máx: {product.maxStock || '-'}</span>
-                              </div>
-                              
-                              <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-lg border border-slate-200">
-                                <button 
-                                  onClick={() => adjustStock(product, -1)}
-                                  disabled={product.stock <= 0}
-                                  className="p-2 text-slate-600 hover:bg-white hover:text-red-600 rounded-md transition-colors disabled:opacity-50"
-                                >
-                                  <Minus className="w-4 h-4" />
-                                </button>
-                                <button 
-                                  onClick={() => adjustStock(product, 1)}
-                                  className="p-2 text-slate-600 hover:bg-white hover:text-emerald-600 rounded-md transition-colors"
-                                >
-                                  <Plus className="w-4 h-4" />
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </motion.div>
+                        <ProductCard key={product.id} product={product} adjustStock={adjustStock} />
                       ))}
                     </div>
                   </div>
