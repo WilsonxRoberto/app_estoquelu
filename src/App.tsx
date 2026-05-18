@@ -57,8 +57,8 @@ const ProductCard = ({ product, adjustStock }: { product: Product, adjustStock: 
       <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col gap-3">
         <div className="flex items-center justify-between pl-2">
           <div className="flex flex-col">
-            <span className="text-2xl font-bold text-blue-600">{product.stock} <span className="text-sm font-normal text-slate-500">{product.unit}</span></span>
-            <span className="text-xs text-slate-400">Máx: {product.maxStock || '-'}</span>
+            <span className="text-4xl font-black text-blue-600 tracking-tight">{product.stock} <span className="text-base font-normal text-slate-500 ml-1">{product.unit}</span></span>
+            <span className="text-xs text-slate-400 mt-1">Máx: {product.maxStock || '-'}</span>
           </div>
           
           <div className="flex items-center gap-2">
