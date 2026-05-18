@@ -207,6 +207,9 @@ export default function App() {
       };
       setStockLogs(prev => [...prev, newLog]);
     }
+    
+    // Limpar o campo de busca automaticamente após a ação
+    setSearchTerm('');
   };
 
   const filteredProducts = useMemo(() => {
