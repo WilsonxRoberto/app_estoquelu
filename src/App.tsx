@@ -6,7 +6,7 @@ import { fetchSheetData, sendLogsToSheet, type Product, type StockLog } from './
 const DEFAULT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1WkmVkfNAu83_Sc7AfFnofP-1oSpdJxdjOmlyTcLcvTc/export?format=csv&gid=247051946';
 
 const ProductCard = ({ product, adjustStock }: { product: Product, adjustStock: (p: Product, delta: number) => void }) => {
-  const [amount, setAmount] = useState<number | ''>(1);
+  const [amount, setAmount] = useState<number | ''>('');
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -23,6 +23,7 @@ const ProductCard = ({ product, adjustStock }: { product: Product, adjustStock: 
   const handleAdjust = (multiplier: number) => {
     const delta = (typeof amount === 'number' ? amount : 1) * multiplier;
     adjustStock(product, delta);
+    setAmount('');
   };
 
   return (
@@ -67,7 +68,8 @@ const ProductCard = ({ product, adjustStock }: { product: Product, adjustStock: 
               min="1"
               value={amount}
               onChange={handleAmountChange}
-              className="w-16 text-center text-base font-bold text-slate-700 bg-slate-100 border border-slate-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none py-1"
+              placeholder="1"
+              className="w-16 text-center text-base font-bold text-slate-700 bg-slate-100 border border-slate-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none py-1 placeholder:text-slate-400 placeholder:font-normal"
             />
           </div>
         </div>
