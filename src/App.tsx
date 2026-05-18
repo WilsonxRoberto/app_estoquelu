@@ -75,19 +75,19 @@ const ProductCard = ({ product, adjustStock }: { product: Product, adjustStock: 
         
         <div className="flex gap-2">
           <button 
-            onClick={() => handleAdjust(-1)}
-            disabled={product.stock <= 0}
-            className="flex-1 py-2 flex items-center justify-center gap-2 text-sm font-bold text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => handleAdjust(1)}
+            className="w-1/3 py-2 flex items-center justify-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors"
           >
-            <Minus className="w-4 h-4" />
-            Saída
+            <Plus className="w-3 h-3" />
+            Entrada
           </button>
           <button 
-            onClick={() => handleAdjust(1)}
-            className="flex-1 py-2 flex items-center justify-center gap-2 text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors"
+            onClick={() => handleAdjust(-1)}
+            disabled={product.stock <= 0}
+            className="w-2/3 py-2 flex items-center justify-center gap-2 text-base font-black text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
           >
-            <Plus className="w-4 h-4" />
-            Entrada
+            <Minus className="w-5 h-5" />
+            Saída
           </button>
         </div>
       </div>
