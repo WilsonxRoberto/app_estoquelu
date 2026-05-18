@@ -68,7 +68,6 @@ const ProductCard = ({ product, adjustStock }: { product: Product, adjustStock: 
               min="1"
               value={amount}
               onChange={handleAmountChange}
-              placeholder="1"
               className="w-16 text-center text-base font-bold text-slate-700 bg-slate-100 border border-slate-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none py-1 placeholder:text-slate-400 placeholder:font-normal"
             />
           </div>
