@@ -51,3 +51,25 @@ export const fetchSheetData = (url: string): Promise<Product[]> => {
     });
   });
 };
+
+export interface StockLog {
+  date: string;
+  time: string;
+  sku: string;
+  name: string;
+  delta: number;
+  finalStock: number;
+}
+
+export const sendLogsToSheet = async (logs: StockLog[]) => {
+  const url = 'https://script.google.com/macros/s/AKfycbzHJbd1lpHpvvsjOlPM92oev0swcFwdvWSYLaPnBhDhgVGwB1W29syjOIDaWLeyGchfrg/exec';
+  // Usando mode no-cors e text/plain para evitar bloqueios de CORS do Google Apps Script
+  return fetch(url, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {
+      'Content-Type': 'text/plain',
+    },
+    body: JSON.stringify(logs)
+  });
+};
