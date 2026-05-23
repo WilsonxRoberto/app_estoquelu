@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Package, Search, CloudDownload, AlertCircle, Plus, Minus, Bell, Save } from 'lucide-react';
+import { Package, Search, CloudDownload, AlertCircle, Plus, Minus, Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchSheetData, sendLogsToSheet, type Product, type StockLog } from './services/googleSheets';
 
@@ -107,8 +107,6 @@ export default function App() {
   }, [products]);
   const [isLoading, setIsLoading] = useState(true);
   const [isImporting, setIsImporting] = useState(false);
-  const [isSavingLogs, setIsSavingLogs] = useState(false);
-  const [stockLogs, setStockLogs] = useState<StockLog[]>([]);
   const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' | 'warning' } | null>(null);
 
   // Load from local storage on initial render
@@ -121,11 +119,6 @@ export default function App() {
       // If nothing in local storage, automatically try to import
       handleImport();
     }
-    
-    const savedLogs = localStorage.getItem('estoqueLogs');
-    if (savedLogs) {
-      setStockLogs(JSON.parse(savedLogs));
-    }
   }, []);
 
   // Save to local storage whenever products change
@@ -134,11 +127,6 @@ export default function App() {
       localStorage.setItem('estoqueProducts', JSON.stringify(products));
     }
   }, [products]);
-  
-  // Save logs to local storage
-  useEffect(() => {
-    localStorage.setItem('estoqueLogs', JSON.stringify(stockLogs));
-  }, [stockLogs]);
 
   const showNotification = (message: string, type: 'success' | 'error' | 'warning') => {
     setNotification({ message, type });
@@ -162,23 +150,7 @@ export default function App() {
     }
   };
 
-  const handleSaveLogs = async () => {
-    if (stockLogs.length === 0) return;
-    
-    setIsSavingLogs(true);
-    showNotification("Salvando histórico na planilha...", "warning");
-    
-    try {
-      await sendLogsToSheet(stockLogs);
-      setStockLogs([]);
-      showNotification(`Sucesso! ${stockLogs.length} alterações salvas no histórico.`, "success");
-    } catch (error) {
-      console.error("Save logs error:", error);
-      showNotification("Erro ao salvar histórico na planilha.", "error");
-    } finally {
-      setIsSavingLogs(false);
-    }
-  };
+
 
   const adjustStock = (product: Product, delta: number) => {
     let newStockVal = product.stock;
@@ -212,7 +184,14 @@ export default function App() {
         delta: delta,
         finalStock: newStockVal
       };
-      setStockLogs(prev => [...prev, newLog]);
+      
+      // Auto-save the log immediately
+      sendLogsToSheet([newLog]).then(() => {
+        showNotification("Alteração salva no histórico automaticamente.", "success");
+      }).catch(err => {
+        console.error("Auto-save error:", err);
+        showNotification("Erro ao salvar no histórico da planilha.", "error");
+      });
     }
     
     // Limpar o campo de busca automaticamente após a ação e focar
@@ -255,16 +234,6 @@ export default function App() {
           </div>
           
           <div className="flex gap-2 flex-wrap justify-end">
-            {stockLogs.length > 0 && (
-              <button 
-                onClick={handleSaveLogs}
-                disabled={isSavingLogs}
-                className="btn-primary bg-emerald-600 hover:bg-emerald-700 border-emerald-600 text-white disabled:bg-emerald-400"
-              >
-                <Save className="w-5 h-5" />
-                {isSavingLogs ? 'Salvando...' : `Salvar Histórico (${stockLogs.length})`}
-              </button>
-            )}
             <button 
               onClick={handleImport}
               disabled={isImporting}
