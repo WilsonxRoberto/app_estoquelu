@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Package, Search, CloudDownload, AlertCircle, Plus, Minus, Bell, Save } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchSheetData, sendLogsToSheet, type Product, type StockLog } from './services/googleSheets';
@@ -98,6 +98,7 @@ const ProductCard = ({ product, adjustStock }: { product: Product, adjustStock: 
 export default function App() {
   const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
 
   const categories = useMemo(() => {
@@ -214,8 +215,9 @@ export default function App() {
       setStockLogs(prev => [...prev, newLog]);
     }
     
-    // Limpar o campo de busca automaticamente após a ação
+    // Limpar o campo de busca automaticamente após a ação e focar
     setSearchTerm('');
+    searchInputRef.current?.focus();
   };
 
   const filteredProducts = useMemo(() => {
@@ -312,6 +314,7 @@ export default function App() {
                 ))}
               </select>
               <input
+                ref={searchInputRef}
                 type="text"
                 placeholder="Buscar por nome ou SKU..."
                 className="search-input sm:max-w-xs"
